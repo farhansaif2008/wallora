@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wallora — Premium Wallpapers</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090b10;color:#fff;font-family:Arial,sans-serif}header{position:sticky;top:0;z-index:5;background:#0c0f15eF;border-bottom:1px solid #252b38;backdrop-filter:blur(12px)}
+nav{max-width:1180px;margin:auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}.logo{font-size:25px;font-weight:800}.logo b{color:#805cff}nav a{color:#c4c8d1;text-decoration:none;margin-left:22px}
+.hero{max-width:950px;margin:55px auto 35px;text-align:center;padding:0 20px}.hero h1{font-size:clamp(40px,7vw,72px);margin:0 0 16px}.hero h1 span{color:#805cff}.hero p{color:#aab1bf;font-size:18px;line-height:1.6}
+.search{margin:28px auto;max-width:650px;display:flex;padding:6px;background:#151923;border:1px solid #2a3040;border-radius:14px}.search input{flex:1;background:none;border:0;outline:0;color:white;padding:13px;font-size:16px}.btn{border:0;background:#805cff;color:white;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}
+.cats{max-width:1180px;margin:0 auto 30px;padding:0 22px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap}.cat{padding:10px 16px;border-radius:99px;border:1px solid #2a3040;background:#121620;color:#c8cdd7;cursor:pointer}.cat.active{background:#805cff;border-color:#805cff;color:white}
+.grid{max-width:1180px;margin:auto;padding:0 22px 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}.card{background:#121620;border:1px solid #252c3a;border-radius:16px;overflow:hidden}.card img{width:100%;height:300px;object-fit:cover;display:block}.info{padding:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}.title{font-weight:700}.tag{font-size:12px;color:#8e97a7;margin-top:4px}.download{color:white;text-decoration:none;background:#805cff;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:700}
+.upload{max-width:760px;margin:0 auto 70px;padding:28px 22px}.panel{background:#11151e;border:1px solid #292f3d;border-radius:18px;padding:25px}.panel h2{margin-top:0}.drop{border:2px dashed #394154;border-radius:14px;padding:30px;text-align:center;color:#aeb5c2}.drop input{margin-top:14px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.fields input,.fields select{width:100%;padding:12px;background:#171c26;border:1px solid #303747;color:white;border-radius:9px}.status{margin-top:12px;color:#aeb5c2}footer{text-align:center;color:#727b8b;border-top:1px solid #222836;padding:28px}
+@media(max-width:650px){.fields{grid-template-columns:1fr}.card img{height:260px}nav a{display:none}}
+</style></head>
+<body>
+<header><nav><div class="logo">Wal<b>lora</b></div><div><a href="#wallpapers">Wallpapers</a><a href="#upload">Upload</a></div></nav></header>
+<section class="hero"><h1>Beautiful wallpapers.<br><span>Made for your screen.</span></h1><p>Upload, organize and share wallpapers from one online gallery.</p>
+<div class="search"><input id="search" placeholder="Search wallpapers..."><button class="btn" onclick="render()">Search</button></div></section>
+<div class="cats"><button class="cat active" onclick="setCat('All',this)">All</button><button class="cat" onclick="setCat('Cars',this)">Cars</button><button class="cat" onclick="setCat('Nature',this)">Nature</button><button class="cat" onclick="setCat('Gaming',this)">Gaming</button><button class="cat" onclick="setCat('Space',this)">Space</button><button class="cat" onclick="setCat('Other',this)">Other</button></div>
+<main id="wallpapers"><div class="grid" id="grid"></div></main>
+<section class="upload" id="upload"><div class="panel"><h2>📤 Upload Wallpaper</h2><p style="color:#9ea6b5">Select an image from your computer. JPG, PNG, WEBP and GIF up to 10 MB.</p>
+<form id="form"><div class="fields"><input name="title" placeholder="Wallpaper title"><select name="category"><option>Cars</option><option>Nature</option><option>Gaming</option><option>Space</option><option>Other</option></select></div>
+<div class="drop"><b>Choose your wallpaper</b><br><input type="file" name="wallpaper" accept="image/jpeg,image/png,image/webp,image/gif" required></div><br><button class="btn" type="submit">Upload Wallpaper</button><div class="status" id="status"></div></form></div></section>
+<footer>© 2026 Wallora</footer>
+<script>
+let category="All";
+async function getData(){const r=await fetch("/api/wallpapers");return r.json()}
+async function render(){const q=document.getElementById("search").value.toLowerCase();const data=await getData();const list=data.filter(x=>(category==="All"||x.category===category)&&x.title.toLowerCase().includes(q));document.getElementById("grid").innerHTML=list.map(x=>`<article class="card"><img loading="lazy" src="${x.file}" alt="${x.title}"><div class="info"><div><div class="title">${x.title}</div><div class="tag">${x.category}</div></div><a class="download" href="${x.file}" download>Download</a></div></article>`).join("")||'<p style="color:#9098a7">No wallpapers yet. Upload the first one!</p>'}
+function setCat(c,b){category=c;document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()}
+document.getElementById("form").addEventListener("submit",async e=>{e.preventDefault();const s=document.getElementById("status");s.textContent="Uploading...";const r=await fetch("/api/upload",{method:"POST",body:new FormData(e.target)});const d=await r.json();if(!r.ok){s.textContent=d.error||"Upload failed";return}s.textContent="Uploaded successfully ✓";e.target.reset();render()});
+render();
+</script></body></html>

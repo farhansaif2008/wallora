@@ -27,7 +27,7 @@ const upload = multer({
 });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname,"public")));
+app.use(express.static(__dirname));
 app.use("/uploads", express.static(uploadDir));
 
 app.get("/api/wallpapers", (_,res)=>{
@@ -48,4 +48,4 @@ app.post("/api/upload", upload.single("wallpaper"), (req,res)=>{
   res.json(item);
 });
 
-app.listen(PORT, ()=>console.log(`Wallora running on http://localhost:${PORT}`));
+app.listen(PORT, "0.0.0.0", ()=>console.log(`Wallora running on port ${PORT}`));

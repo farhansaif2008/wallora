@@ -5,14 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wallora — Premium Wallpapers</title>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090b10;color:#fff;font-family:Arial,sans-serif}
 header{position:sticky;top:0;z-index:5;background:#0c0f15ef;border-bottom:1px solid #252b38;backdrop-filter:blur(12px)}
 nav{max-width:1180px;margin:auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:25px;font-weight:800}
-.logo b{color:#805cff}
+.logo{font-size:25px;font-weight:800}.logo b{color:#805cff}
 nav a{color:#c4c8d1;text-decoration:none;margin-left:22px}
 .hero{max-width:950px;margin:55px auto 35px;text-align:center;padding:0 20px}
 .hero h1{font-size:clamp(40px,7vw,72px);margin:0 0 16px}
@@ -21,7 +19,8 @@ nav a{color:#c4c8d1;text-decoration:none;margin-left:22px}
 .search{margin:28px auto;max-width:650px;display:flex;padding:6px;background:#151923;border:1px solid #2a3040;border-radius:14px}
 .search input{flex:1;background:none;border:0;outline:0;color:white;padding:13px;font-size:16px}
 .btn{border:0;background:#805cff;color:white;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}
-.btn:disabled{opacity:.6;cursor:wait}
+.btn:disabled{opacity:.5;cursor:wait}
+.secondary{background:#252b38}
 .cats{max-width:1180px;margin:0 auto 30px;padding:0 22px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
 .cat{padding:10px 16px;border-radius:99px;border:1px solid #2a3040;background:#121620;color:#c8cdd7;cursor:pointer}
 .cat.active{background:#805cff;border-color:#805cff;color:white}
@@ -29,29 +28,32 @@ nav a{color:#c4c8d1;text-decoration:none;margin-left:22px}
 .card{background:#121620;border:1px solid #252c3a;border-radius:16px;overflow:hidden}
 .card img{width:100%;height:300px;object-fit:cover;display:block}
 .info{padding:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}
-.title{font-weight:700}
+.title{font-weight:700;overflow-wrap:anywhere}
 .tag{font-size:12px;color:#8e97a7;margin-top:4px}
-.download{color:white;text-decoration:none;background:#805cff;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:700}
+.download,.delete{color:white;text-decoration:none;background:#805cff;padding:9px 12px;border:0;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer}
+.delete{background:#a83242;margin-top:7px}
 .upload{max-width:760px;margin:0 auto 70px;padding:28px 22px}
 .panel{background:#11151e;border:1px solid #292f3d;border-radius:18px;padding:25px}
 .panel h2{margin-top:0}
 .drop{border:2px dashed #394154;border-radius:14px;padding:30px;text-align:center;color:#aeb5c2}
-.drop input{margin-top:14px}
+.drop input{margin-top:14px;max-width:100%}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}
 .fields input,.fields select{width:100%;padding:12px;background:#171c26;border:1px solid #303747;color:white;border-radius:9px}
-.status{margin-top:12px;color:#aeb5c2;line-height:1.5}
+.status{margin-top:12px;color:#aeb5c2;line-height:1.5;overflow-wrap:anywhere}
+.hidden{display:none!important}
+.admin-label{color:#a78bfa;font-size:13px;margin-bottom:14px}
 footer{text-align:center;color:#727b8b;border-top:1px solid #222836;padding:28px}
-@media(max-width:650px){.fields{grid-template-columns:1fr}.card img{height:260px}nav a{display:none}}
+@media(max-width:650px){.fields{grid-template-columns:1fr}.card img{height:260px}nav a{margin-left:10px;font-size:13px}}
 </style>
 </head>
-
 <body>
+
 <header>
 <nav>
 <div class="logo">Wal<b>lora</b></div>
 <div>
 <a href="#wallpapers">Wallpapers</a>
-<a href="#upload">Upload</a>
+<a href="#admin">Admin</a>
 </div>
 </nav>
 </header>
@@ -78,12 +80,31 @@ footer{text-align:center;color:#727b8b;border-top:1px solid #222836;padding:28px
 <div class="grid" id="grid"></div>
 </main>
 
-<section class="upload" id="upload">
+<section class="upload" id="admin">
 <div class="panel">
+
+<!-- Login form: visible to visitors -->
+<div id="loginPanel">
+<h2>🔐 Admin Login</h2>
+<p style="color:#9ea6b5">Only the authorized Wallora administrator can upload wallpapers.</p>
+<form id="loginForm">
+<div class="fields">
+<input id="email" type="email" placeholder="Admin email" required>
+<input id="password" type="password" placeholder="Password" required>
+</div>
+<button class="btn" id="loginBtn" type="submit">Login</button>
+<div class="status" id="loginStatus" aria-live="polite"></div>
+</form>
+</div>
+
+<!-- Admin controls: visible only after verified admin login -->
+<div id="adminPanel" class="hidden">
+<div class="admin-label">✓ ADMIN ACCESS VERIFIED</div>
 <h2>📤 Upload Wallpaper</h2>
 <p style="color:#9ea6b5">JPG, PNG, WEBP and GIF up to 10 MB.</p>
+<button class="btn secondary" id="logoutBtn" type="button">Logout</button>
 
-<form id="form">
+<form id="uploadForm">
 <div class="fields">
 <input name="title" placeholder="Wallpaper title">
 <select name="category">
@@ -94,7 +115,6 @@ footer{text-align:center;color:#727b8b;border-top:1px solid #222836;padding:28px
 <option>Other</option>
 </select>
 </div>
-
 <div class="drop">
 <b>Choose your wallpaper</b><br>
 <input type="file" name="wallpaper"
@@ -102,43 +122,40 @@ accept="image/jpeg,image/png,image/webp,image/gif" required>
 </div>
 <br>
 <button class="btn" id="uploadBtn" type="submit">Upload Wallpaper</button>
-<div class="status" id="status" aria-live="polite"></div>
+<div class="status" id="uploadStatus" aria-live="polite"></div>
 </form>
+</div>
 </div>
 </section>
 
 <footer>© 2026 Wallora</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = "https://dxukrriqpxsjvmvuwibj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_sBCCdPPIeQHHF0RAVSbtQw_6Bcd8PJr";
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let category = "All";
 let wallpapers = [];
+let currentUser = null;
+let isAdmin = false;
 
 const grid = document.getElementById("grid");
-const statusBox = document.getElementById("status");
+const loginPanel = document.getElementById("loginPanel");
+const adminPanel = document.getElementById("adminPanel");
 
-async function getData() {
-  const {data,error} = await db
-    .from("wallpapers")
+async function getData(){
+  const {data,error} = await db.from("wallpapers")
     .select("id,title,category,file_url,created_at")
     .order("created_at",{ascending:false});
-
   if(error) throw error;
   return data || [];
 }
 
-function render() {
+function render(){
   const q = document.getElementById("search").value.toLowerCase();
-
   const list = wallpapers.filter(x =>
     (category === "All" || x.category === category) &&
     x.title.toLowerCase().includes(q)
@@ -146,70 +163,242 @@ function render() {
 
   grid.replaceChildren();
 
-  if(!list.length) {
+  if(!list.length){
     const empty = document.createElement("p");
-    empty.style.color = "#9098a7";
-    empty.textContent = "No wallpapers yet. Upload the first one!";
+    empty.style.color="#9098a7";
+    empty.textContent="No wallpapers yet. Upload the first one!";
     grid.appendChild(empty);
     return;
   }
 
-  list.forEach(x => {
-    const card = document.createElement("article");
-    card.className = "card";
+  list.forEach(x=>{
+    const card=document.createElement("article");
+    card.className="card";
 
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.src = x.file_url;
-    img.alt = x.title;
+    const img=document.createElement("img");
+    img.loading="lazy";
+    img.src=x.file_url;
+    img.alt=x.title;
 
-    const info = document.createElement("div");
-    info.className = "info";
+    const info=document.createElement("div");
+    info.className="info";
 
-    const details = document.createElement("div");
+    const details=document.createElement("div");
+    const title=document.createElement("div");
+    title.className="title";
+    title.textContent=x.title;
 
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = x.title;
-
-    const tag = document.createElement("div");
-    tag.className = "tag";
-    tag.textContent = x.category;
-
-    const link = document.createElement("a");
-    link.className = "download";
-    link.href = x.file_url;
-    link.download = "";
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = "Download";
+    const tag=document.createElement("div");
+    tag.className="tag";
+    tag.textContent=x.category;
 
     details.append(title,tag);
-    info.append(details,link);
+
+    const actions=document.createElement("div");
+
+    const link=document.createElement("a");
+    link.className="download";
+    link.href=x.file_url;
+    link.download="";
+    link.target="_blank";
+    link.rel="noopener";
+    link.textContent="Download";
+    actions.appendChild(link);
+
+    if(isAdmin){
+      const del=document.createElement("button");
+      del.className="delete";
+      del.textContent="Delete";
+      del.addEventListener("click",()=>deleteWallpaper(x));
+      actions.appendChild(del);
+    }
+
+    info.append(details,actions);
     card.append(img,info);
     grid.appendChild(card);
   });
 }
 
-async function loadWallpapers() {
-  grid.textContent = "Loading wallpapers...";
-
-  try {
-    wallpapers = await getData();
+async function loadWallpapers(){
+  grid.textContent="Loading wallpapers...";
+  try{
+    wallpapers=await getData();
     render();
-  } catch(error) {
-    grid.textContent = "Could not load wallpapers: " + error.message;
+  }catch(error){
+    grid.textContent="Could not load wallpapers: "+error.message;
   }
 }
 
-document.querySelectorAll(".cat").forEach(btn => {
-  btn.addEventListener("click",() => {
-    category = btn.dataset.cat;
+async function checkAdmin(user){
+  if(!user) return false;
 
-    document.querySelectorAll(".cat").forEach(b =>
-      b.classList.remove("active")
-    );
+  const {data,error}=await db.from("admins")
+    .select("user_id")
+    .eq("user_id",user.id)
+    .maybeSingle();
 
+  if(error){
+    console.error("Admin verification error:",error);
+    return false;
+  }
+  return !!data;
+}
+
+async function updateAuth(user){
+  currentUser=user;
+  isAdmin=false;
+
+  if(user){
+    isAdmin=await checkAdmin(user);
+  }
+
+  if(isAdmin){
+    loginPanel.classList.add("hidden");
+    adminPanel.classList.remove("hidden");
+  }else{
+    loginPanel.classList.remove("hidden");
+    adminPanel.classList.add("hidden");
+  }
+
+  render();
+}
+
+document.getElementById("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  const btn=document.getElementById("loginBtn");
+  const status=document.getElementById("loginStatus");
+  btn.disabled=true;
+  status.textContent="Checking login...";
+
+  try{
+    const email=document.getElementById("email").value.trim();
+    const password=document.getElementById("password").value;
+
+    const {data,error}=await db.auth.signInWithPassword({email,password});
+    if(error) throw error;
+
+    await updateAuth(data.user);
+
+    if(!isAdmin){
+      await db.auth.signOut();
+      await updateAuth(null);
+      status.textContent="This account is not authorized as Wallora admin.";
+    }else{
+      status.textContent="";
+      e.target.reset();
+    }
+  }catch(error){
+    status.textContent="Login failed: "+error.message;
+  }finally{
+    btn.disabled=false;
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+  const {error}=await db.auth.signOut();
+  if(error){
+    document.getElementById("uploadStatus").textContent=error.message;
+    return;
+  }
+  await updateAuth(null);
+});
+
+document.getElementById("uploadForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  if(!isAdmin || !currentUser){
+    document.getElementById("uploadStatus").textContent="Admin login required.";
+    return;
+  }
+
+  const form=e.target;
+  const file=form.elements.wallpaper.files[0];
+  const btn=document.getElementById("uploadBtn");
+  const status=document.getElementById("uploadStatus");
+
+  if(!file) return;
+
+  if(file.size>10*1024*1024){
+    status.textContent="Image must be under 10 MB.";
+    return;
+  }
+
+  if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)){
+    status.textContent="Unsupported image format.";
+    return;
+  }
+
+  btn.disabled=true;
+  status.textContent="Uploading image...";
+
+  const ext=file.name.split(".").pop().toLowerCase();
+  const filePath=Date.now()+"-"+crypto.randomUUID()+"."+ext;
+
+  try{
+    const {error:uploadError}=await db.storage.from("wallpapers")
+      .upload(filePath,file,{contentType:file.type,upsert:false});
+    if(uploadError) throw uploadError;
+
+    const {data:publicData}=db.storage.from("wallpapers").getPublicUrl(filePath);
+
+    const title=form.elements.title.value.trim() ||
+      file.name.replace(/\.[^/.]+$/,"");
+
+    const {error:insertError}=await db.from("wallpapers").insert({
+      title,
+      category:form.elements.category.value,
+      file_url:publicData.publicUrl
+    });
+
+    if(insertError){
+      await db.storage.from("wallpapers").remove([filePath]);
+      throw insertError;
+    }
+
+    status.textContent="Uploaded successfully ✓";
+    form.reset();
+    await loadWallpapers();
+
+  }catch(error){
+    console.error(error);
+    status.textContent="Upload failed: "+error.message;
+  }finally{
+    btn.disabled=false;
+  }
+});
+
+async function deleteWallpaper(item){
+  if(!isAdmin || !currentUser){
+    alert("Admin login required.");
+    return;
+  }
+
+  if(!confirm("Delete this wallpaper permanently?")) return;
+
+  try{
+    const marker="/storage/v1/object/public/wallpapers/";
+    const position=item.file_url.indexOf(marker);
+    if(position===-1) throw new Error("Could not identify the storage file.");
+
+    const filePath=decodeURIComponent(item.file_url.slice(position+marker.length));
+
+    const {error:storageError}=await db.storage.from("wallpapers").remove([filePath]);
+    if(storageError) throw storageError;
+
+    const {error:dbError}=await db.from("wallpapers").delete().eq("id",item.id);
+    if(dbError) throw dbError;
+
+    await loadWallpapers();
+  }catch(error){
+    alert("Delete failed: "+error.message);
+  }
+}
+
+document.querySelectorAll(".cat").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    category=btn.dataset.cat;
+    document.querySelectorAll(".cat").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     render();
   });
@@ -218,75 +407,18 @@ document.querySelectorAll(".cat").forEach(btn => {
 document.getElementById("searchBtn").addEventListener("click",render);
 document.getElementById("search").addEventListener("input",render);
 
-document.getElementById("form").addEventListener("submit",async e => {
-  e.preventDefault();
-
-  const form = e.target;
-  const file = form.elements.wallpaper.files[0];
-  const btn = document.getElementById("uploadBtn");
-
-  if(!file) return;
-
-  if(file.size > 10 * 1024 * 1024) {
-    statusBox.textContent = "Image must be under 10 MB.";
-    return;
-  }
-
-  if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)) {
-    statusBox.textContent = "Unsupported image format.";
-    return;
-  }
-
-  btn.disabled = true;
-  statusBox.textContent = "Uploading image...";
-
-  const ext = file.name.split(".").pop().toLowerCase();
-  const filePath = Date.now() + "-" +
-    crypto.randomUUID() + "." + ext;
-
-  try {
-    const {error:uploadError} = await db.storage
-      .from("wallpapers")
-      .upload(filePath,file,{
-        contentType:file.type,
-        upsert:false
-      });
-
-    if(uploadError) throw uploadError;
-
-    const {data:publicData} = db.storage
-      .from("wallpapers")
-      .getPublicUrl(filePath);
-
-    const title = form.elements.title.value.trim() ||
-      file.name.replace(/\.[^/.]+$/,"");
-
-    const {error:insertError} = await db
-      .from("wallpapers")
-      .insert({
-        title:title,
-        category:form.elements.category.value,
-        file_url:publicData.publicUrl
-      });
-
-    if(insertError) {
-      await db.storage.from("wallpapers").remove([filePath]);
-      throw insertError;
-    }
-
-    statusBox.textContent = "Uploaded successfully ✓";
-    form.reset();
-    await loadWallpapers();
-
-  } catch(error) {
-    console.error(error);
-    statusBox.textContent = "Upload failed: " + error.message;
-  } finally {
-    btn.disabled = false;
-  }
+db.auth.onAuthStateChange(async(_event,session)=>{
+  await updateAuth(session?.user || null);
 });
 
-loadWallpapers();
+async function start(){
+  const {data,error}=await db.auth.getSession();
+  if(error) console.error(error);
+  await updateAuth(data?.session?.user || null);
+  await loadWallpapers();
+}
+
+start();
 </script>
 </body>
 </html>

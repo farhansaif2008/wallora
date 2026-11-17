@@ -192,25 +192,36 @@ function render(){
     tag.className="tag";
     tag.textContent=x.category;
 
-    details.append(title,tag);
+details.append(title,tag);
 
-    const actions=document.createElement("div");
+const actions=document.createElement("div");
 
-    const link=document.createElement("a");
-    link.className="download";
-    link.href=x.file_url;
-    link.download="";
-    link.target="_blank";
-    link.rel="noopener";
-    link.textContent="Download";
-    actions.appendChild(link);
+const link=document.createElement("a");
+link.className="download";
 
-    if(isAdmin){
-      const del=document.createElement("button");
-      del.className="delete";
-      del.textContent="Delete";
-      del.addEventListener("click",()=>deleteWallpaper(x));
-      actions.appendChild(del);
+const downloadUrl = new URL(x.file_url);
+downloadUrl.searchParams.set("download", x.title || "wallpaper");
+
+link.href = downloadUrl.toString();
+link.download = (x.title || "wallpaper") + ".jpg";
+link.target = "_blank";
+link.rel = "noopener";
+link.textContent = "Download";
+
+actions.appendChild(link);
+
+if(isAdmin){
+  const del=document.createElement("button");
+  del.className="delete";
+  del.textContent="Delete";
+  del.addEventListener("click",()=>deleteWallpaper(x));
+  actions.appendChild(del);
+}
+
+info.append(details,actions);
+card.append(img,info);
+grid.appendChild(card);
+
     }
 
     info.append(details,actions);
